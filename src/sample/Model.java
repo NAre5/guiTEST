@@ -92,25 +92,32 @@ public class Model {
         }
     }
 
-    public String getUsersEqualUName(String DatabaseName, String User_name) {
-        String sql = "SELECT FirstName,LastName,Birthday,City "
-                + "FROM Users_Table WHERE Username = ?";
+    public String getUserInfo(String DatabaseName, String fieldName, String value, Date Dvalue) {
+        String sql = "SELECT " + fieldName
+                + "FROM Users_Table WHERE " + fieldName + " = ?";
 
         try (Connection conn = this.connect(DatabaseName);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             // set the value
-            pstmt.setString(1, User_name);
+            if (fieldName == "Birthday"){
+                pstmt.setDate(1, Dvalue);
+            }
+            else {
+                pstmt.setString(1, value);
+            }
             //
             ResultSet rs = pstmt.executeQuery();
 
             // loop through the result set
             String result = "";
             while (rs.next()) {
-                result = rs.getString("FirstName") + "\t" +
-                        rs.getString("LastName") + "\t" +
-                        rs.getDate("Birthday") + "\t" +
-                        rs.getString("City") + "\n";
+                if (fieldName == "Birthday"){
+                    result = rs.getDate("Birthday") +"";
+                }
+                else{
+                    result = rs.getString(fieldName);
+                }
             }
             return result;
         } catch (SQLException e) {

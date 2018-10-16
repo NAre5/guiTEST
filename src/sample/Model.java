@@ -4,7 +4,9 @@ import java.sql.*;
 import java.sql.*;
 
 public class Model {
-
+    public enum fieldNameEnum {
+        Username,Password,Birthday,FirstName,LastName,City;
+    }
     public static void check_connection(String dbPath) {
         Connection dbconnection = null;
         try {
@@ -92,7 +94,19 @@ public class Model {
         }
     }
 
-    public String getUserInfo(String DatabaseName, String fieldName, String value, Date Dvalue) {
+    public String getUserInfo(String DatabaseName, fieldNameEnum fieldName, String value) {
+        if(fieldName.equals("Birthday"))
+            return null;
+        return getUserInfo(DatabaseName,fieldName,value,null);
+    }
+
+    public String getUserInfo(String DatabaseName, fieldNameEnum fieldName, Date Dvalue) {
+        if(!fieldName.equals("Birthday"))
+            return null;
+        return getUserInfo(DatabaseName,fieldName,"",Dvalue);
+    }
+
+    public String getUserInfo(String DatabaseName, fieldNameEnum fieldName, String value, Date Dvalue) {
         String sql = "SELECT " + fieldName
                 + "FROM Users_Table WHERE " + fieldName + " = ?";
 
@@ -100,7 +114,7 @@ public class Model {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             // set the value
-            if (fieldName == "Birthday"){
+            if (fieldName.equals(fieldNameEnum.Birthday)){
                 pstmt.setDate(1, Dvalue);
             }
             else {
@@ -112,11 +126,11 @@ public class Model {
             // loop through the result set
             String result = "";
             while (rs.next()) {
-                if (fieldName == "Birthday"){
+                if (fieldName.equals(fieldNameEnum.Birthday)){
                     result = rs.getDate("Birthday") +"";
                 }
                 else{
-                    result = rs.getString(fieldName);
+                    result = rs.getString(fieldName+"");
                 }
             }
             return result;

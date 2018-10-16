@@ -140,5 +140,13 @@ public class Model {
         }
     }
 
+    public void updateUserInfo(String DatabaseName, String UserName_input, String Password_input, Date Birthday_input, String FirstName_input, String LastName_input, String City_input){
+
+    }
+
+    public void deleteUser(String DatabaseName, String UserName_input){
+
+    }
+
 }
 

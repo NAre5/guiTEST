@@ -4,9 +4,8 @@ import java.sql.*;
 import java.sql.*;
 
 public class Model {
-    public enum fieldNameEnum {
-        Username,Password,Birthday,FirstName,LastName,City;
-    }
+    public enum UsersfieldNameEnum {Username,Password,Birthday,FirstName,LastName,City;}
+    public enum tableNameEnum{Users_table;}
     public static void check_connection(String dbPath) {
         Connection dbconnection = null;
         try {
@@ -50,12 +49,11 @@ public class Model {
         String sql = "CREATE TABLE IF NOT EXISTS Users_Table (\n"
                 + "Username text PRIMARY KEY,\n"
                 + "	Password text NOT NULL,\n"
-                + "	Birthday date\n"
+                + "	Birthday text NOT NULL,\n"
                 + "	FirstName text NOT NULL,\n"
                 + "	LastName text NOT NULL,\n"
-                + "	City text NOT NULL,\n"
+                + "	City text NOT NULL\n"
                 + ");";
-
         try (Connection conn = DriverManager.getConnection(url);
              Statement stmt = conn.createStatement()) {
             // create a new table
@@ -65,7 +63,7 @@ public class Model {
         }
     }//creating a new users table
 
-    private Connection connect(String fileName) {
+    private static Connection connect(String fileName) {
         // SQLite connection string
         String url = "jdbc:sqlite:C://sqlite/db/" + fileName;
         Connection conn = null;
@@ -77,14 +75,14 @@ public class Model {
         return conn;
     }
 
-    public void insert(String DatabaseName, String UserName_input, String Password_input, Date Birthday_input, String FirstName_input, String LastName_input, String City_input) {
+    public static void insert(String DatabaseName, String UserName_input, String Password_input, String Birthday_input, String FirstName_input, String LastName_input, String City_input) {
         String sql = "INSERT INTO Users_Table(Username,Password,Birthday,FirstName,LastName,City) VALUES(?,?,?,?,?,?)";
 
-        try (Connection conn = this.connect(DatabaseName);
+        try (Connection conn = connect(DatabaseName);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, UserName_input);
             pstmt.setString(2, Password_input);
-            pstmt.setDate(3, Birthday_input);
+            pstmt.setString(3, Birthday_input);
             pstmt.setString(4, FirstName_input);
             pstmt.setString(5, LastName_input);
             pstmt.setString(6, City_input);
@@ -94,47 +92,43 @@ public class Model {
         }
     }
 
-    public String getUserInfo(String DatabaseName, fieldNameEnum fieldName, String value) {
-        if(fieldName.equals("Birthday"))
-            return null;
-        return getUserInfo(DatabaseName,fieldName,value,null);
-    }
+////    public static String getUserInfo(String DatabaseName,fieldNameEnum wantedfieldName, fieldNameEnum byfieldName, String value) {
+////        if(byfieldName.equals("Birthday"))
+////            return null;
+////        return getUserInfo(DatabaseName,wantedfieldName,byfieldName,value,null);
+////    }
+////
+////    public static String getUserInfo(String DatabaseName, fieldNameEnum fieldName, Date Dvalue) {
+////        if(!fieldName.equals("Birthday"))
+////            return null;
+////        return getUserInfo(DatabaseName,fieldName,"",Dvalue);
+//    }
 
-    public String getUserInfo(String DatabaseName, fieldNameEnum fieldName, Date Dvalue) {
-        if(!fieldName.equals("Birthday"))
-            return null;
-        return getUserInfo(DatabaseName,fieldName,"",Dvalue);
-    }
+    public static String selectQuery(String DatabaseName, String tableName ,String wantedfields, String whereCondition) {
+        String sql = "SELECT " + wantedfields
+                + " FROM " + tableName +" WHERE " + whereCondition ;
 
-    public String getUserInfo(String DatabaseName, fieldNameEnum fieldName, String value, Date Dvalue) {
-        String sql = "SELECT " + fieldName
-                + "FROM Users_Table WHERE " + fieldName + " = ?";
-
-        try (Connection conn = this.connect(DatabaseName);
+        try (Connection conn = connect(DatabaseName);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            // set the value
-            if (fieldName.equals(fieldNameEnum.Birthday)){
-                pstmt.setDate(1, Dvalue);
-            }
-            else {
-                pstmt.setString(1, value);
-            }
-            //
             ResultSet rs = pstmt.executeQuery();
 
             // loop through the result set
             String result = "";
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int columnsNumber;
+            columnsNumber = rsmd.getColumnCount();
             while (rs.next()) {
-                if (fieldName.equals(fieldNameEnum.Birthday)){
-                    result = rs.getDate("Birthday") +"";
+                for (int i = 1; i <= columnsNumber; i++) {
+                    if (i > 1) result += ",  ";
+                    String columnValue = rs.getString(i);
+                    result += columnValue;
                 }
-                else{
-                    result = rs.getString(fieldName+"");
-                }
+                result += '\n';
             }
             return result;
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             System.out.println(e.getMessage());
             return "ERROR";
         }
@@ -171,7 +165,7 @@ public class Model {
     public void deleteUser(String DatabaseName, String UserName_key){
         String sql = "DELETE FROM Users_Table WHERE UserName = ?";
 
-        try (Connection conn = this.connect(DatabaseName);
+        try (Connection conn = connect(DatabaseName);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             // set the corresponding param

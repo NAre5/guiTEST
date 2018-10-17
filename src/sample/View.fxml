@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<TabPane xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+<TabPane fx:id="tabPane" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <tabs>
       <Tab fx:id="signTab" text="Sign in">
          <content>
@@ -39,7 +39,7 @@
                         <Insets />
                      </GridPane.margin></TextField>
                   <TextField fx:id="passwordSign" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Button fx:id="submit" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#submitValues" prefHeight="66.0" prefWidth="600.0" text="Submit!" textAlignment="CENTER" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+                  <Button fx:id="submit" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#submit" prefHeight="66.0" prefWidth="600.0" text="Submit!" textAlignment="CENTER" GridPane.columnSpan="2" GridPane.rowIndex="3" />
                </children>
             </GridPane>
          </content>
@@ -82,15 +82,15 @@
                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <Button fx:id="signOut" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="110.0" prefWidth="400.0" text="Sign out" />
-                        <Button fx:id="delete" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="59.0" prefWidth="400.0" text="Delete account" GridPane.columnIndex="1" />
+                        <Button fx:id="signOut" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#signOut" prefHeight="110.0" prefWidth="400.0" text="Sign out" />
+                        <Button fx:id="delete" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#delete" prefHeight="59.0" prefWidth="400.0" text="Delete account" GridPane.columnIndex="1" />
                      </children>
                   </GridPane>
                </children>
             </VBox>
          </content>
       </Tab>
-      <Tab text="Create">
+      <Tab fx:id="createTab" text="Create">
          <content>
             <GridPane>
               <columnConstraints>
@@ -114,7 +114,7 @@
                   <Label alignment="CENTER" prefHeight="21.0" prefWidth="128.0" text="Last name:" GridPane.rowIndex="4" />
                   <Label alignment="CENTER" prefHeight="21.0" prefWidth="163.0" text="Birth date:" GridPane.rowIndex="5" />
                   <Label alignment="CENTER" prefHeight="21.0" prefWidth="154.0" text="City:" GridPane.rowIndex="6" />
-                  <Button fx:id="create" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#submitValues" prefHeight="31.0" prefWidth="759.0" text="Create!" GridPane.columnSpan="2" GridPane.rowIndex="7" />
+                  <Button fx:id="create" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#create" prefHeight="31.0" prefWidth="759.0" text="Create!" GridPane.columnSpan="2" GridPane.rowIndex="7" />
                   <TextField fx:id="usernameCreate" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
                   <TextField fx:id="passwordCreate" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <TextField fx:id="firstCreate" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
@@ -143,7 +143,7 @@
                      <children>
                         <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="51.0" prefWidth="202.0" text="Username:" />
                         <TextField fx:id="usernameRead" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="51.0" prefWidth="233.0" GridPane.columnIndex="1" />
-                        <Button fx:id="show" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="92.0" prefWidth="200.0" text="Show!" GridPane.columnIndex="2" />
+                        <Button fx:id="show" contentDisplay="CENTER" mnemonicParsing="false" onAction="#show" prefHeight="92.0" prefWidth="200.0" text="Show!" GridPane.columnIndex="2" />
                      </children>
                   </GridPane>
                   <GridPane prefHeight="260.0" prefWidth="600.0">
@@ -163,10 +163,10 @@
                         <Label alignment="CENTER" prefHeight="21.0" prefWidth="128.0" text="Last name:" GridPane.rowIndex="2" />
                         <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="21.0" prefWidth="163.0" text="Birth date:" GridPane.rowIndex="3" />
                         <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="21.0" prefWidth="154.0" text="City:" GridPane.rowIndex="4" />
-                        <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="21.0" prefWidth="356.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                        <Label alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <Label fx:id="firstRead" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="21.0" prefWidth="356.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label fx:id="lastRead" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label fx:id="birthRead" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Label fx:id="cityRead" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                         <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="78.0" prefWidth="600.0" text="User details:" GridPane.columnSpan="2" />
                      </children>
                   </GridPane>
@@ -174,7 +174,7 @@
             </VBox>
          </content>
       </Tab>
-      <Tab fx:id="UpdateTab" text="Update">
+      <Tab fx:id="updateTab" text="Update">
          <content>
             <GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                <columnConstraints>
@@ -195,15 +195,15 @@
                   <Label alignment="CENTER" prefHeight="21.0" prefWidth="256.0" text="Last name:" GridPane.rowIndex="3" />
                   <Label alignment="CENTER" prefHeight="21.0" prefWidth="240.0" text="Birth date:" GridPane.rowIndex="4" />
                   <Label alignment="CENTER" prefHeight="21.0" prefWidth="224.0" text="City:" GridPane.rowIndex="5" />
-                  <TextField fx:id="firstUpdate" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" promptText="Leave empty if update not needed" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <TextField fx:id="lastUpdate" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" promptText="Leave empty if update not needed" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                  <TextField fx:id="birthUpdate" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" promptText="Leave empty if update not needed" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                  <TextField fx:id="cityUpdate" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" promptText="Leave empty if update not needed" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                  <TextField fx:id="firstUpdate" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <TextField fx:id="lastUpdate" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <TextField fx:id="birthUpdate" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <TextField fx:id="cityUpdate" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                   <Label alignment="CENTER" prefHeight="21.0" prefWidth="258.0" text="Username:" />
                   <Label alignment="CENTER" prefHeight="21.0" prefWidth="242.0" text="Password:" GridPane.rowIndex="1" />
-                  <TextField fx:id="passwordUpdate" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" promptText="Leave empty if update not needed" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <TextField fx:id="usernameUpdate" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" promptText="Leave empty if update not needed" GridPane.columnIndex="1" />
-                  <Button fx:id="update" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="31.0" prefWidth="689.0" text="Update!" GridPane.columnSpan="2" GridPane.rowIndex="6" />
+                  <TextField fx:id="passwordUpdate" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <TextField fx:id="usernameUpdate" alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
+                  <Button fx:id="update" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#update" prefHeight="31.0" prefWidth="689.0" text="Update!" GridPane.columnSpan="2" GridPane.rowIndex="6" />
                </children>
             </GridPane>
          </content>

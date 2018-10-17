@@ -47,7 +47,7 @@ public class Model extends Observable {
 
     public static void createNewUsersTable(String fileName) {
         // SQLite connection string
-        String url = "jdbc:sqlite:C://sqlite/db/" + fileName;
+        String url = "jdbc:sqlite:" + Configuration.loadProperty("directoryPath") + fileName;
 
         // SQL statement for creating a new table
         String sql = "CREATE TABLE IF NOT EXISTS Users_Table (\n"
@@ -69,7 +69,7 @@ public class Model extends Observable {
 
     private static Connection connect(String fileName) {
         // SQLite connection string
-        String url = "jdbc:sqlite:C://sqlite/db/" + fileName;
+        String url = "jdbc:sqlite:"+ Configuration.loadProperty("directoryPath") + fileName;
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);

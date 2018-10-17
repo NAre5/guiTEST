@@ -34,12 +34,6 @@ public class Model extends Observable {
         String url = "jdbc:sqlite:"+ Configuration.loadProperty("directoryPath") + fileName;
 
         try (Connection conn = DriverManager.getConnection(url)) {
-            if (conn != null) {
-                DatabaseMetaData meta = conn.getMetaData();
-                System.out.println("The driver name is " + meta.getDriverName());
-                System.out.println("A new database has been created.");
-            }
-
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -61,7 +55,7 @@ public class Model extends Observable {
         try (Connection conn = DriverManager.getConnection(url);
              Statement stmt = conn.createStatement()) {
             // create a new table
-            stmt.execute(sql);
+            stmt.executeUpdate(sql);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }

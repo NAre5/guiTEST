@@ -4,6 +4,8 @@ import java.sql.*;
 import java.sql.*;
 
 public class Model {
+
+
     public enum UsersfieldNameEnum {Username,Password,Birthday,FirstName,LastName,City;}
     public enum tableNameEnum{Users_table;}
     public static void check_connection(String dbPath) {
@@ -75,6 +77,14 @@ public class Model {
         return conn;
     }
 
+    // TODO: 17-Oct-18 //ten barosh oded;
+    public static boolean legalUsername(String databaseName,String tableName,String username) {
+        if(selectQuery(databaseName,tableName,"Username","Username='"+username+"'").equals("ERROR")){
+            return true;
+        }
+        return false;
+    }
+
     public static void insert(String DatabaseName, String UserName_input, String Password_input, String Birthday_input, String FirstName_input, String LastName_input, String City_input) {
         String sql = "INSERT INTO Users_Table(Username,Password,Birthday,FirstName,LastName,City) VALUES(?,?,?,?,?,?)";
 
@@ -128,7 +138,7 @@ public class Model {
             }
             return result;
         }
-        catch (SQLException e) {
+        catch (Exception e) {
             System.out.println(e.getMessage());
             return "ERROR";
         }

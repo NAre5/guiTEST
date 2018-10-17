@@ -162,8 +162,8 @@ public class Model {
         }
     }
 
-    public void deleteUser(String DatabaseName, String UserName_key){
-        String sql = "DELETE FROM Users_Table WHERE UserName = ?";
+    public void deleteUser(String DatabaseName,String tableName, String UserName_key, String whereCondition){
+        String sql = "DELETE FROM " + tableName+" WHERE "+ whereCondition;
 
         try (Connection conn = connect(DatabaseName);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -177,6 +177,5 @@ public class Model {
             System.out.println(e.getMessage());
         }
     }
-
 }
 

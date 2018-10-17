@@ -51,7 +51,7 @@ public class Model extends Observable {
                 + "	FirstName text NOT NULL,\n"
                 + "	LastName text NOT NULL,\n"
                 + "	City text NOT NULL\n"
-                + ");";
+                + ");";//check
         try (Connection conn = DriverManager.getConnection(url);
              Statement stmt = conn.createStatement()) {
             // create a new table

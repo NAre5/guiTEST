@@ -1,15 +1,14 @@
 package sample;
 
+import java.io.File;
 import java.sql.*;
 import java.sql.*;
-import java.util.Observable;
 
-public class Model extends Observable {
+public class Model {
 
 
     public enum UsersfieldNameEnum {Username,Password,Birthday,FirstName,LastName,City;}
     public enum tableNameEnum{Users_table;}
-
     public static void check_connection(String dbPath) {
         Connection dbconnection = null;
         try {
@@ -74,11 +73,11 @@ public class Model extends Observable {
     }
 
     // TODO: 17-Oct-18 //ten barosh oded;
-    public static boolean legalUsername(String databaseName,String tableName,String username) {
-        if(selectQuery(databaseName,tableName,"Username","Username='"+username+"'").equals("ERROR")){
-            return true;
+    public static boolean existingUsername(String databaseName,String tableName,String username) {
+        if(selectQuery(databaseName,tableName,"UserName","UserName='"+username+"'").equals("")){
+            return false;
         }
-        return false;
+        return true;
     }
 
     public static void insert(String DatabaseName, String UserName_input, String Password_input, String Birthday_input, String FirstName_input, String LastName_input, String City_input) {
@@ -125,12 +124,13 @@ public class Model extends Observable {
             int columnsNumber;
             columnsNumber = rsmd.getColumnCount();
             while (rs.next()) {
+                if(!result.equals(""))
+                    result += '\n';
                 for (int i = 1; i <= columnsNumber; i++) {
                     if (i > 1) result += ",  ";
                     String columnValue = rs.getString(i);
                     result += columnValue;
                 }
-                result += '\n';
             }
             return result;
         }

@@ -62,7 +62,7 @@ public class Controller implements Initializable {
     public TextField city;
 
     List<TextField> fields = new ArrayList<>();
-    final String directoryPath = "C:/DATABASE/";
+    final String directoryPath = "C:/DATABASE/";//////
     final String databaseName = "database.db";
     final String tableName = "users";
     Model model;
@@ -87,7 +87,7 @@ public class Controller implements Initializable {
         //create table
         Model.createNewDatabase(databaseName);
         Model.createNewUsersTable(tableName);
-        tabSignOut();
+        tabSignOut();/////
     }
 
     public void tabSignOut(){

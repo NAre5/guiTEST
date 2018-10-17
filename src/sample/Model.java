@@ -2,12 +2,14 @@ package sample;
 
 import java.sql.*;
 import java.sql.*;
+import java.util.Observable;
 
-public class Model {
+public class Model extends Observable {
 
 
     public enum UsersfieldNameEnum {Username,Password,Birthday,FirstName,LastName,City;}
     public enum tableNameEnum{Users_table;}
+
     public static void check_connection(String dbPath) {
         Connection dbconnection = null;
         try {
@@ -29,7 +31,7 @@ public class Model {
 
     public static void createNewDatabase(String fileName) {
 
-        String url = "jdbc:sqlite:C:/sqlite/db/" + fileName;
+        String url = "jdbc:sqlite:"+ Configuration.loadProperty("directoryPath") + fileName;
 
         try (Connection conn = DriverManager.getConnection(url)) {
             if (conn != null) {

@@ -140,12 +140,48 @@ public class Model {
         }
     }
 
-    public void updateUserInfo(String DatabaseName, String UserName_input, String Password_input, Date Birthday_input, String FirstName_input, String LastName_input, String City_input){
+    public void updateUserInfo(String DatabaseName, String UserName_key, String UserName_input, String Password_input, Date Birthday_input, String FirstName_input, String LastName_input, String City_input){
+        String sql = "UPDATE Users_Table SET UserName = ? , "
+                + "Password = ? "
+                + "Birthday = ? "
+                + "FirstName = ? "
+                + "LastName = ? "
+                + "City = ? "
+                + "WHERE UserName = ?";
 
+        try (Connection conn = this.connect(DatabaseName);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // set the corresponding param
+            pstmt.setString(1, UserName_input);
+            pstmt.setString(2, Password_input);
+            pstmt.setDate(3, Birthday_input);
+            pstmt.setString(4, FirstName_input);
+            pstmt.setString(5, LastName_input);
+            pstmt.setString(6, City_input);
+            pstmt.setString(7, UserName_key);
+
+            // update
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
-    public void deleteUser(String DatabaseName, String UserName_input){
+    public void deleteUser(String DatabaseName, String UserName_key){
+        String sql = "DELETE FROM Users_Table WHERE UserName = ?";
 
+        try (Connection conn = this.connect(DatabaseName);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // set the corresponding param
+            pstmt.setString(1, UserName_key);
+            // execute the delete statement
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
 }

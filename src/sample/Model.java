@@ -1,8 +1,11 @@
 package sample;
 
+import javafx.scene.control.DatePicker;
+
 import java.io.File;
 import java.sql.*;
 import java.sql.*;
+import java.time.LocalDate;
 
 public class Model {
 
@@ -150,7 +153,7 @@ public class Model {
         }
     }
 
-    public void updateUserInfo(String UserName_key, String UserName_input, String Password_input, Date Birthday_input, String FirstName_input, String LastName_input, String City_input){
+    public void updateUserInfo(String UserName_key, String UserName_input, String Password_input, String Birthday_input, String FirstName_input, String LastName_input, String City_input){
         String sql = "UPDATE Users_Table SET UserName = ? , "
                 + "Password = ? "
                 + "Birthday = ? "
@@ -165,7 +168,7 @@ public class Model {
             // set the corresponding param
             pstmt.setString(1, UserName_input);
             pstmt.setString(2, Password_input);
-            pstmt.setDate(3, Birthday_input);
+            pstmt.setString(3, Birthday_input);
             pstmt.setString(4, FirstName_input);
             pstmt.setString(5, LastName_input);
             pstmt.setString(6, City_input);

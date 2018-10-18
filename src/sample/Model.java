@@ -52,7 +52,7 @@ public class Model {
         String url = "jdbc:sqlite:" + Configuration.loadProperty("directoryPath") + databaseName;
 
         try {
-            c = DriverManager.getConnection("jdbc:sqlite:"+ Configuration.loadProperty("directoryPath") + fileName);
+            c = DriverManager.getConnection("jdbc:sqlite:"+ Configuration.loadProperty("directoryPath") + databaseName);
             stmt = c.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS Users_Table (\n"
                     + "Username text PRIMARY KEY,\n"

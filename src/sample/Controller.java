@@ -15,15 +15,19 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class Controller implements Initializable {
+
+    //tabs
     public TabPane tabPane;
     public Tab signTab;
     public Tab homeTab;
     public Tab createTab;
     public Tab readTab;
     public Tab updateTab;
+    //Sign in tab
     public TextField usernameSign;
     public TextField passwordSign;
     public Button submit;
+    //Home tab
     public Label usernameHome;
     public Label firstHome;
     public Label lastHome;
@@ -31,6 +35,7 @@ public class Controller implements Initializable {
     public Label cityHome;
     public Button delete;
     public Button signOut;
+    //Create tab
     public TextField usernameCreate;
     public TextField passwordCreate;
     public TextField confirmCreate;
@@ -39,12 +44,14 @@ public class Controller implements Initializable {
     public TextField birthCreate;
     public TextField cityCreate;
     public Button create;
+    //Read tab
     public TextField usernameRead;
     public Button show;
     public Label firstRead;
     public Label lastRead;
     public Label birthRead;
     public Label cityRead;
+    //update tab
     public TextField usernameUpdate;
     public TextField passwordUpdate;
     public TextField firstUpdate;
@@ -53,15 +60,6 @@ public class Controller implements Initializable {
     public TextField cityUpdate;
     public Button update;
 
-
-    public TextField username;
-    public TextField password;
-    public TextField firstname;
-    public TextField lastname;
-    public TextField birthdate;
-    public TextField city;
-
-    List<TextField> fields = new ArrayList<>();
     final String directoryPath = "C:/DATABASE/";//////
     final String databaseName = "database.db";
     final String tableName = "Users_Table";
@@ -69,26 +67,13 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        model=new Model();
-        fields.add(username);
-        fields.add(password);
-        fields.add(firstname);
-        fields.add(lastname);
-        fields.add(birthdate);
-        fields.add(city);
-        //create directory
-        try {
-            Files.createDirectory(Paths.get(directoryPath));//check if ok to end with '/'
-        } catch (IOException ignored) {
-        }
-        //create database
-        if (!Files.exists(Paths.get(directoryPath+databaseName)))
-            ;//create db file;
+        tabSignOut();
+    }
 
-        //create table
-        model.createNewDatabase(databaseName);
-        Model.createNewUsersTable(databaseName);
-        tabSignOut();/////
+    public void setModel(Model model){
+        this.model=model;
+        model.createNewDatabase();
+        model.createNewUsersTable();
     }
 
     public void tabSignOut(){
@@ -177,12 +162,12 @@ public class Controller implements Initializable {
             confirm("Password must be match in both options");
             event.consume();
         }
-        else if(Model.existingUsername(databaseName,tableName,usernameCreate.getText())==true){
+        else if(model.existingUsername(tableName,usernameCreate.getText())==true){
             confirm("Username already taken");
             event.consume();
         }
         else{
-            Model.insert(databaseName,usernameCreate.getText(),passwordCreate.getText(),birthCreate.getText(),firstCreate.getText(),lastCreate.getText(),cityCreate.getText());
+            model.insert(usernameCreate.getText(),passwordCreate.getText(),birthCreate.getText(),firstCreate.getText(),lastCreate.getText(),cityCreate.getText());
             return true;
         }
         return false;
@@ -193,11 +178,11 @@ public class Controller implements Initializable {
     }
 
     private void signIn(ActionEvent event, String username, String password) {
-        if(Model.existingUsername(databaseName,tableName,username)==false){
+        if(model.existingUsername(tableName,username)==false){
             confirm("Username is incorrect");
             event.consume();
         }
-        else if(Model.selectQuery(databaseName,tableName,"Password","UserName='"+username+"'").equals(password)==false){
+        else if(model.selectQuery(tableName,"Password","UserName='"+username+"'").equals(password)==false){
             confirm("Username or Password are incorrect");
             event.consume();
         }
@@ -217,11 +202,11 @@ public class Controller implements Initializable {
     }
 
     public void show(ActionEvent event){
-        if(Model.existingUsername(databaseName,tableName,usernameRead.getText())==true){
-            firstRead.setText(Model.selectQuery(databaseName,tableName,"FirstName","UserName='"+usernameRead.getText()+"'"));
-            lastRead.setText(Model.selectQuery(databaseName,tableName,"LastName","UserName='"+usernameRead.getText()+"'"));
-            birthRead.setText(Model.selectQuery(databaseName,tableName,"Birthday","UserName='"+usernameRead.getText()+"'"));
-            cityRead.setText(Model.selectQuery(databaseName,tableName,"City","UserName='"+usernameRead.getText()+"'"));
+        if(model.existingUsername(tableName,usernameRead.getText())==true){
+            firstRead.setText(model.selectQuery(tableName,"FirstName","UserName='"+usernameRead.getText()+"'"));
+            lastRead.setText(model.selectQuery(tableName,"LastName","UserName='"+usernameRead.getText()+"'"));
+            birthRead.setText(model.selectQuery(tableName,"Birthday","UserName='"+usernameRead.getText()+"'"));
+            cityRead.setText(model.selectQuery(tableName,"City","UserName='"+usernameRead.getText()+"'"));
         }
         else {
             confirm("Username is incorrect");
@@ -234,10 +219,10 @@ public class Controller implements Initializable {
 
     private void updateHome(String username) {
         usernameHome.setText(username);
-        firstHome.setText(Model.selectQuery(databaseName,tableName,"FirstName","UserName='"+username+"'"));
-        lastHome.setText(Model.selectQuery(databaseName,tableName,"LastName","UserName='"+username+"'"));
-        birthHome.setText(Model.selectQuery(databaseName,tableName,"Birthday","UserName='"+username+"'"));
-        cityHome.setText(Model.selectQuery(databaseName,tableName,"City","UserName='"+username+"'"));
+        firstHome.setText(model.selectQuery(tableName,"FirstName","UserName='"+username+"'"));
+        lastHome.setText(model.selectQuery(tableName,"LastName","UserName='"+username+"'"));
+        birthHome.setText(model.selectQuery(tableName,"Birthday","UserName='"+username+"'"));
+        cityHome.setText(model.selectQuery(tableName,"City","UserName='"+username+"'"));
     }
 
     public boolean confirm(String str){
@@ -247,34 +232,33 @@ public class Controller implements Initializable {
         return result.get() == ButtonType.OK;
     }
 
-    public void submitValues(ActionEvent actionEvent) {
-        //trim all fields from spaces ((not must))
-        for (TextField field : fields) {
-            String newText = field.getText().trim();
-            field.setText(newText);
-
-        }
-
-        Connection conn;
-
-        final String url = "jdbc:sqlite:" + directoryPath + databaseName;
-        try {
-            conn = DriverManager.getConnection(url);
-            StringJoiner values = new StringJoiner(",", "", "");
-            for (TextField field : fields) {
-                values.add(field.getText());
-            }
-
-
-            String insertQuery = "INSERT INTO " + tableName +
-                    " (" + values.toString() + ") " +
-                    "VALUES (?,?,?,?,?,?);";//check///////////
-            PreparedStatement ps = conn.prepareStatement(insertQuery);
-
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-    }
+//    public void submitValues(ActionEvent actionEvent) {
+//        //trim all fields from spaces ((not must))
+//        for (TextField field : fields) {
+//            String newText = field.getText().trim();
+//            field.setText(newText);
+//
+//        }
+//
+//        Connection conn;
+//
+//        final String url = "jdbc:sqlite:" + directoryPath + databaseName;
+//        try {
+//            conn = DriverManager.getConnection(url);
+//            StringJoiner values = new StringJoiner(",", "", "");
+//            for (TextField field : fields) {
+//                values.add(field.getText());
+//            }
+//
+//
+//            String insertQuery = "INSERT INTO " + tableName +
+//                    " (" + values.toString() + ") " +
+//                    "VALUES (?,?,?,?,?,?);";//check///////////
+//            PreparedStatement ps = conn.prepareStatement(insertQuery);
+//
+//
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

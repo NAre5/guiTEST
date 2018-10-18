@@ -6,10 +6,16 @@ import java.sql.*;
 
 public class Model {
 
+    String databaseName;
 
     public enum UsersfieldNameEnum {Username,Password,Birthday,FirstName,LastName,City;}
     public enum tableNameEnum{Users_table;}
-    public static void check_connection(String dbPath) {
+
+    public Model(String databaseName) {
+        this.databaseName = databaseName+".db";
+    }
+
+    public void check_connection(String dbPath) {
         Connection dbconnection = null;
         try {
             String url = "jdbc:sqlite:" + dbPath;
@@ -28,9 +34,9 @@ public class Model {
         }
     }//checking connection to database with path of the database.
 
-    public static void createNewDatabase(String fileName) {
+    public void createNewDatabase() {
 
-        String url = "jdbc:sqlite:"+ Configuration.loadProperty("directoryPath") + fileName;
+        String url = "jdbc:sqlite:"+ Configuration.loadProperty("directoryPath") + databaseName;
 
         try (Connection conn = DriverManager.getConnection(url)) {
         } catch (SQLException e) {
@@ -38,9 +44,9 @@ public class Model {
         }
     }//creating a new database with the parameter name
 
-    public static void createNewUsersTable(String fileName) {
+    public void createNewUsersTable() {
         // SQLite connection string
-        String url = "jdbc:sqlite:" + Configuration.loadProperty("directoryPath") + fileName;
+        String url = "jdbc:sqlite:" + Configuration.loadProperty("directoryPath") + databaseName;
 
         // SQL statement for creating a new table
         String sql = "CREATE TABLE IF NOT EXISTS Users_Table (\n"
@@ -60,7 +66,7 @@ public class Model {
         }
     }//creating a new users table
 
-    private static Connection connect(String fileName) {
+    private Connection connect(String fileName) {
         // SQLite connection string
         String url = "jdbc:sqlite:"+ Configuration.loadProperty("directoryPath") + fileName;
         Connection conn = null;
@@ -73,17 +79,17 @@ public class Model {
     }
 
     // TODO: 17-Oct-18 //ten barosh oded;
-    public static boolean existingUsername(String databaseName,String tableName,String username) {
-        if(selectQuery(databaseName,tableName,"UserName","UserName='"+username+"'").equals("")){
+    public boolean existingUsername(String tableName,String username) {
+        if(selectQuery(tableName,"UserName","UserName='"+username+"'").equals("")){
             return false;
         }
         return true;
     }
 
-    public static void insert(String DatabaseName, String UserName_input, String Password_input, String Birthday_input, String FirstName_input, String LastName_input, String City_input) {
+    public void insert( String UserName_input, String Password_input, String Birthday_input, String FirstName_input, String LastName_input, String City_input) {
         String sql = "INSERT INTO Users_Table(Username,Password,Birthday,FirstName,LastName,City) VALUES(?,?,?,?,?,?)";
 
-        try (Connection conn = connect(DatabaseName);
+        try (Connection conn = connect(databaseName);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, UserName_input);
             pstmt.setString(2, Password_input);
@@ -97,23 +103,23 @@ public class Model {
         }
     }
 
-////    public static String getUserInfo(String DatabaseName,fieldNameEnum wantedfieldName, fieldNameEnum byfieldName, String value) {
+////    public String getUserInfo(fieldNameEnum wantedfieldName, fieldNameEnum byfieldName, String value) {
 ////        if(byfieldName.equals("Birthday"))
 ////            return null;
-////        return getUserInfo(DatabaseName,wantedfieldName,byfieldName,value,null);
+////        return getUserInfo(databaseName,wantedfieldName,byfieldName,value,null);
 ////    }
 ////
-////    public static String getUserInfo(String DatabaseName, fieldNameEnum fieldName, Date Dvalue) {
+////    public String getUserInfo( fieldNameEnum fieldName, Date Dvalue) {
 ////        if(!fieldName.equals("Birthday"))
 ////            return null;
-////        return getUserInfo(DatabaseName,fieldName,"",Dvalue);
+////        return getUserInfo(databaseName,fieldName,"",Dvalue);
 //    }
 
-    public static String selectQuery(String DatabaseName, String tableName ,String wantedfields, String whereCondition) {
+    public String selectQuery( String tableName ,String wantedfields, String whereCondition) {
         String sql = "SELECT " + wantedfields
                 + " FROM " + tableName +" WHERE " + whereCondition ;
 
-        try (Connection conn = connect(DatabaseName);
+        try (Connection conn = connect(databaseName);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             ResultSet rs = pstmt.executeQuery();
@@ -140,7 +146,7 @@ public class Model {
         }
     }
 
-    public void updateUserInfo(String DatabaseName, String UserName_key, String UserName_input, String Password_input, Date Birthday_input, String FirstName_input, String LastName_input, String City_input){
+    public void updateUserInfo(String UserName_key, String UserName_input, String Password_input, Date Birthday_input, String FirstName_input, String LastName_input, String City_input){
         String sql = "UPDATE Users_Table SET UserName = ? , "
                 + "Password = ? "
                 + "Birthday = ? "
@@ -149,7 +155,7 @@ public class Model {
                 + "City = ? "
                 + "WHERE UserName = ?";
 
-        try (Connection conn = this.connect(DatabaseName);
+        try (Connection conn = this.connect(databaseName);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             // set the corresponding param
@@ -168,10 +174,10 @@ public class Model {
         }
     }
 
-    public void deleteUser(String DatabaseName,String tableName, String UserName_key, String whereCondition){
+    public void deleteUser(String tableName, String UserName_key, String whereCondition){
         String sql = "DELETE FROM " + tableName+" WHERE "+ whereCondition;
 
-        try (Connection conn = connect(DatabaseName);
+        try (Connection conn = connect(databaseName);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             // set the corresponding param

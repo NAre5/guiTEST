@@ -4,7 +4,7 @@ import java.io.File;
 import java.sql.*;
 import java.sql.*;
 
-public class Model {
+public class Model extends Observable {
 
 
     public enum UsersfieldNameEnum {Username,Password,Birthday,FirstName,LastName,City;}
@@ -12,7 +12,7 @@ public class Model {
     public static void check_connection(String dbPath) {
         Connection dbconnection = null;
         try {
-            String url = "jdbc:sqlite:" + dbPath;
+            String url = "jdbc:sqlite:" + Configuration.loadProperty("directoryPath") + dbPath;
             dbconnection = DriverManager.getConnection(url);
             System.out.println("Database " + dbPath + " Connected");
         } catch (SQLException e) {
@@ -33,6 +33,7 @@ public class Model {
         String url = "jdbc:sqlite:"+ Configuration.loadProperty("directoryPath") + fileName;
 
         try (Connection conn = DriverManager.getConnection(url)) {
+            conn.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -40,23 +41,25 @@ public class Model {
 
     public static void createNewUsersTable(String fileName) {
         // SQLite connection string
-        String url = "jdbc:sqlite:" + Configuration.loadProperty("directoryPath") + fileName;
+        Connection c = null;
+        Statement stmt = null;
 
-        // SQL statement for creating a new table
-        String sql = "CREATE TABLE IF NOT EXISTS Users_Table (\n"
-                + "Username text PRIMARY KEY,\n"
-                + "	Password text NOT NULL,\n"
-                + "	Birthday text NOT NULL,\n"
-                + "	FirstName text NOT NULL,\n"
-                + "	LastName text NOT NULL,\n"
-                + "	City text NOT NULL\n"
-                + ");";//check
-        try (Connection conn = DriverManager.getConnection(url);
-             Statement stmt = conn.createStatement()) {
-            // create a new table
+        try {
+            c = DriverManager.getConnection("jdbc:sqlite:"+ Configuration.loadProperty("directoryPath") + fileName);
+            stmt = c.createStatement();
+            String sql = "CREATE TABLE IF NOT EXISTS Users_Table (\n"
+                    + "Username text PRIMARY KEY,\n"
+                    + "	Password text NOT NULL,\n"
+                    + "	Birthday text NOT NULL,\n"
+                    + "	FirstName text NOT NULL,\n"
+                    + "	LastName text NOT NULL,\n"
+                    + "	City text NOT NULL\n"
+                    + ");";
             stmt.executeUpdate(sql);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            stmt.close();
+            c.close();
+        } catch ( Exception e ) {
+            e.printStackTrace();
         }
     }//creating a new users table
 

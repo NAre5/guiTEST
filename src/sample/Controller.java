@@ -77,13 +77,13 @@ public class Controller implements Initializable {
         fields.add(birthdate);
         fields.add(city);
         //create directory
-        try {
-            Files.createDirectory(Paths.get(directoryPath));//check if ok to end with '/'
-        } catch (IOException ignored) {
-        }
-        //create database
-        if (!Files.exists(Paths.get(directoryPath+databaseName)))
-            ;//create db file;
+//        try {
+//            Files.createDirectory(Paths.get(directoryPath));//check if ok to end with '/'
+//        } catch (IOException ignored) {
+//        }
+//        //create database
+//        if (!Files.exists(Paths.get(directoryPath+databaseName)))
+//            ;//create db file;
 
         //create table
         model.createNewDatabase(databaseName);

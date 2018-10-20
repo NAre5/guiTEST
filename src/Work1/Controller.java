@@ -344,53 +344,23 @@ public class Controller implements Initializable {
     }
 
     private String getPassword(String username){
-        return model.UsersTable_getUserByUsername(username)[1];
+        return model.UsersTable_getUserByUsername(username)[Model.UsersfieldNameEnum.Password.ordinal()];
     }
 
     private String getBirthday(String username){
-        return model.UsersTable_getUserByUsername(username)[2];
+        return model.UsersTable_getUserByUsername(username)[Model.UsersfieldNameEnum.Birthday.ordinal()];
     }
 
     private String getFirstName(String username){
-        return model.UsersTable_getUserByUsername(username)[3];
+        return model.UsersTable_getUserByUsername(username)[Model.UsersfieldNameEnum.FirstName.ordinal()];
     }
 
     private String getLastName(String username){
-        return model.UsersTable_getUserByUsername(username)[4];
+        return model.UsersTable_getUserByUsername(username)[Model.UsersfieldNameEnum.LastName.ordinal()];
     }
 
     private String getCity(String username){
-        return model.UsersTable_getUserByUsername(username)[5];
+        return model.UsersTable_getUserByUsername(username)[Model.UsersfieldNameEnum.City.ordinal()];
     }
 
-
-//    public void submitValues(ActionEvent actionEvent) {
-//        //trim all fields from spaces ((not must))
-//        for (TextField field : fields) {
-//            String newText = field.getText().trim();
-//            field.setText(newText);
-//
-//        }
-//
-//        Connection conn;
-//
-//        final String url = "jdbc:sqlite:" + directoryPath + databaseName;
-//        try {
-//            conn = DriverManager.getConnection(url);
-//            StringJoiner values = new StringJoiner(",", "", "");
-//            for (TextField field : fields) {
-//                values.add(field.getText());
-//            }
-//
-//
-//            String insertQuery = "INSERT INTO " + tableName +
-//                    " (" + values.toString() + ") " +
-//                    "VALUES (?,?,?,?,?,?);";//check///////////
-//            PreparedStatement ps = conn.prepareStatement(insertQuery);
-//
-//
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
 }

@@ -1,43 +1,24 @@
 package sample;
 
-import javafx.scene.control.DatePicker;
-
-import java.io.File;
 import java.sql.*;
-import java.sql.*;
-import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-public class Model {
-
-    String databaseName;
-
+public class Model implements IModel {
+    //attributes
+    private String databaseName;
+    //Enums...
     public enum UsersfieldNameEnum {Username,Password,Birthday,FirstName,LastName,City;}
-    public enum tableNameEnum{Users_table;}
 
+    public enum tableNameEnum{Users_table;}
+    //constructor
     public Model(String databaseName) {
         this.databaseName = databaseName+".db";
+        createNewDatabase();
     }
-
-    public void check_connection(String dbPath) {
-        Connection dbconnection = null;
-        try {
-            String url = "jdbc:sqlite:" + Configuration.loadProperty("directoryPath") + dbPath;
-            dbconnection = DriverManager.getConnection(url);
-            System.out.println("Database " + dbPath + " Connected");
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        } finally {
-            try {
-                if (dbconnection != null) {
-                    dbconnection.close();
-                }
-            } catch (SQLException ex) {
-                System.out.println(ex.getMessage());
-            }
-        }
-    }//checking connection to database with path of the database.
-
-    public void createNewDatabase() {
+    // private functions (generics)
+    private void createNewDatabase() {
 
         String url = "jdbc:sqlite:"+ Configuration.loadProperty("directoryPath") + databaseName;
 
@@ -73,9 +54,100 @@ public class Model {
         }
     }//creating a new users table
 
-    private Connection connect(String fileName) {
+    private void insertQuery(String table_name,Class<? extends Enum<?>> tableEnum, String[] insert_values) {
+        String [] field_array = getNames(tableEnum);
+        String sql = "INSERT INTO "+table_name+"(";
+        for (int i=0;i<field_array.length;i++){
+            sql += field_array[i] + ",";
+        }
+        sql = sql.substring(0,sql.length()-1);
+        sql += ") VALUES(";
+        for (int i=0;i<field_array.length;i++){
+            if (i != field_array.length -1)
+                sql +=  "?,";
+            else
+                sql += "?)";
+        }
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            for (int i=0;i<field_array.length;i++){
+                pstmt.setString(i+1, insert_values[i]);
+            }
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }//insert query pattern
+
+    private List<String[]> selectQuery(String table_name, String where_condition) {
+        String sql = "SELECT *" + " FROM " + table_name +" WHERE " + where_condition ;
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = pstmt.executeQuery();
+            // loop through the result set
+            int nCol = rs.getMetaData().getColumnCount();
+            List<String[]> table = new ArrayList<>();
+            while( rs.next()) {
+                String[] row = new String[nCol];
+                for( int iCol = 1; iCol <= nCol; iCol++ ){
+                    Object obj = rs.getObject( iCol );
+                    row[iCol-1] = (obj == null) ?null:obj.toString();
+                }
+                table.add( row );
+            }
+            return table;
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }//select query pattern
+
+    private void updateQuery(String table_name,Class<? extends Enum<?>> tableEnum, String[] update_values, String where_condition) {
+        String [] fields_array = getNames(tableEnum);
+        String sql = "UPDATE "+table_name+" SET ";
+        for (int i=0;i<fields_array.length;i++){
+            sql += fields_array[i] + " = ? ,";
+        }
+        sql = sql.substring(0,sql.length()-1) + " ";
+        sql += "WHERE " + where_condition;
+
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // set the corresponding param
+            for (int j=0;j<fields_array.length;j++){
+                pstmt.setString(j+1, update_values[j]);
+            }
+            // update
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }//update query pattern
+
+    private static String[] getNames(Class<? extends Enum<?>> e) {
+        return Arrays.toString(e.getEnumConstants()).replaceAll("^.|.$", "").split(", ");
+    }//converting enum to String array
+
+    private void deleteQuery(String table_name, String where_condition) {
+        String sql = "DELETE FROM " + table_name+" WHERE "+where_condition ;
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            // execute the delete statement
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }//delete query pattern
+
+    private Connection connect() {
         // SQLite connection string
-        String url = "jdbc:sqlite:"+ Configuration.loadProperty("directoryPath") + fileName;
+        String url = "jdbc:sqlite:"+ Configuration.loadProperty("directoryPath") + databaseName;
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
@@ -83,118 +155,52 @@ public class Model {
             System.out.println(e.getMessage());
         }
         return conn;
+    }//connecting to the database
+    //public Functions:
+
+    // Users_Table
+    @Override
+    public void UsersTable_createUser(String Username_val, String Password_val, String Birthday_val, String FirstName_val, String LastName_val, String City_val) {
+        String [] values = {Username_val,Password_val,Birthday_val,FirstName_val,LastName_val,City_val};
+        insertQuery("Users_Table",UsersfieldNameEnum.class,values);
     }
 
-    // TODO: 17-Oct-18 //ten barosh oded;
-    public boolean existingUsername(String tableName,String username) {
-        if(selectQuery(tableName,"UserName","UserName='"+username+"'").equals("")){
+    @Override
+    public String[] UsersTable_getUserByUsername(String Username_val) {
+        List<String[]> result = selectQuery("Users_Table",UsersfieldNameEnum.Username + " = '" + Username_val+"'");
+        if(result.size() != 1)
+            return null;
+        else
+            return result.get(0);
+    }
+
+    @Override
+    public void UsersTable_updateUserInfoByUsername(String Username_key, String Username_val, String Password_val, String Birthday_val, String FirstName_val, String LastName_val, String City_val) {
+        String [] values = {Username_val,Password_val,Birthday_val,FirstName_val,LastName_val,City_val};
+        updateQuery(tableNameEnum.Users_table.toString(),UsersfieldNameEnum.class,values,UsersfieldNameEnum.Username.toString() + " = '" + Username_key+"'");
+    }
+
+    @Override
+    public void UsersTable_deleteUserByUsername(String Username_key) {
+        deleteQuery(tableNameEnum.Users_table.toString(),UsersfieldNameEnum.Username + " = '" + Username_key + "'");
+    }
+
+    @Override
+    public boolean UsersTable_existingUsername(String username) {
+        if(UsersTable_getUserByUsername(username) == null)
             return false;
-        }
+        else
+            return true;
+    }
+
+    public boolean UsersTable_checkPassword(String Username_val,String Password_val) {
+        List<String[]> result = selectQuery("Users_Table",UsersfieldNameEnum.Username + " = '" + Username_val+"'");
+        if(result.size() != 1)
+            return false;
+        else if(result.get(0)[1].equals(Password_val)==false)
+            return false;
         return true;
     }
 
-    public void insert( String UserName_input, String Password_input, String Birthday_input, String FirstName_input, String LastName_input, String City_input) {
-        String sql = "INSERT INTO Users_Table(Username,Password,Birthday,FirstName,LastName,City) VALUES(?,?,?,?,?,?)";
 
-        try (Connection conn = connect(databaseName);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, UserName_input);
-            pstmt.setString(2, Password_input);
-            pstmt.setString(3, Birthday_input);
-            pstmt.setString(4, FirstName_input);
-            pstmt.setString(5, LastName_input);
-            pstmt.setString(6, City_input);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-////    public String getUserInfo(fieldNameEnum wantedfieldName, fieldNameEnum byfieldName, String value) {
-////        if(byfieldName.equals("Birthday"))
-////            return null;
-////        return getUserInfo(databaseName,wantedfieldName,byfieldName,value,null);
-////    }
-////
-////    public String getUserInfo( fieldNameEnum fieldName, Date Dvalue) {
-////        if(!fieldName.equals("Birthday"))
-////            return null;
-////        return getUserInfo(databaseName,fieldName,"",Dvalue);
-//    }
-
-    public String selectQuery( String tableName ,String wantedfields, String whereCondition) {
-        String sql = "SELECT " + wantedfields
-                + " FROM " + tableName +" WHERE " + whereCondition ;
-
-        try (Connection conn = connect(databaseName);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            ResultSet rs = pstmt.executeQuery();
-
-            // loop through the result set
-            String result = "";
-            ResultSetMetaData rsmd = rs.getMetaData();
-            int columnsNumber;
-            columnsNumber = rsmd.getColumnCount();
-            while (rs.next()) {
-                if(!result.equals(""))
-                    result += '\n';
-                for (int i = 1; i <= columnsNumber; i++) {
-                    if (i > 1) result += ",  ";
-                    String columnValue = rs.getString(i);
-                    result += columnValue;
-                }
-            }
-            return result;
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-            return "ERROR";
-        }
-    }
-
-    public void updateUserInfo(String UserName_key, String UserName_input, String Password_input, String Birthday_input, String FirstName_input, String LastName_input, String City_input){
-        String sql = "UPDATE Users_Table SET UserName = ? , "
-                + "Password = ? "
-                + "Birthday = ? "
-                + "FirstName = ? "
-                + "LastName = ? "
-                + "City = ? "
-                + "WHERE UserName = ?";
-
-        try (Connection conn = this.connect(databaseName);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            // set the corresponding param
-            pstmt.setString(1, UserName_input);
-            pstmt.setString(2, Password_input);
-            pstmt.setString(3, Birthday_input);
-            pstmt.setString(4, FirstName_input);
-            pstmt.setString(5, LastName_input);
-            pstmt.setString(6, City_input);
-            pstmt.setString(7, UserName_key);
-
-            // update
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    public void deleteUser(String tableName, String UserName_key, String whereCondition){
-        String sql = "DELETE FROM " + tableName+" WHERE "+ whereCondition;
-
-        try (Connection conn = connect(databaseName);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            // set the corresponding param
-            pstmt.setString(1, UserName_key);
-            // execute the delete statement
-            pstmt.executeUpdate();
-
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
 }
-

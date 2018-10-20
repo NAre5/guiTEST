@@ -3,17 +3,12 @@ package sample;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import java.io.IOException;
+import sample.Model;
+
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
 
@@ -78,12 +73,12 @@ public class Controller implements Initializable {
 
     public void setModel(Model model){
         this.model=model;
-        model.createNewDatabase();
         model.createNewUsersTable();
     }
 
     public void tabSignOut(){
         clearAll();
+        username="";
         tabPane.getTabs().remove(0,tabPane.getTabs().size());
         tabPane.getTabs().add(signTab);
         tabPane.getTabs().add(createTab);
@@ -166,19 +161,19 @@ public class Controller implements Initializable {
 
     public boolean create(ActionEvent event) {
         if(createEmpty()==true){
-            confirm("Please fill all the fields");
+            error("Please fill all the fields");
             event.consume();
         }
         else if(passwordCreate.getText().equals(confirmCreate.getText())==false){
-            confirm("Password must be match in both options");
+            error("Password must be match in both options");
             event.consume();
         }
-        else if(model.existingUsername(tableName,usernameCreate.getText())==true){
-            confirm("Username already taken");
+        else if(model.UsersTable_existingUsername(usernameCreate.getText())==true){
+            error("Username already taken");
             event.consume();
         }
-        else{
-            model.insert(usernameCreate.getText(),passwordCreate.getText(),DatePicker2Str(birthCreate),firstCreate.getText(),lastCreate.getText(),cityCreate.getText());
+        else if(confirm("Are you sure you want to Sign up with those details?")){
+            model.UsersTable_createUser(usernameCreate.getText(),passwordCreate.getText(),DatePicker2Str(birthCreate),firstCreate.getText(),lastCreate.getText(),cityCreate.getText());
             return true;
         }
         return false;
@@ -206,12 +201,12 @@ public class Controller implements Initializable {
     }
 
     private void signIn(ActionEvent event, String username, String password) {
-        if(model.existingUsername(tableName,username)==false){
-            confirm("Username is incorrect");
+        if(model.UsersTable_existingUsername(username)==false){
+            error("Username is incorrect");
             event.consume();
         }
-        else if(model.selectQuery(tableName,"Password","UserName='"+username+"'").equals(password)==false){
-            confirm("Username or Password are incorrect");
+        else if(model.UsersTable_checkPassword(username,passwordSign.getText())==false && model.UsersTable_checkPassword(username,passwordCreate.getText())==false){
+            error("Username or Password are incorrect");
             event.consume();
         }
         else{
@@ -224,76 +219,120 @@ public class Controller implements Initializable {
 
     private void fillUpdate(String username) {
         usernameUpdate.setText(username);
-        passwordUpdate.setText(model.selectQuery(tableName,"Password","UserName='"+username+"'"));
-        confirmUpdate.setText(model.selectQuery(tableName,"Password","UserName='"+username+"'"));
-        firstUpdate.setText(model.selectQuery(tableName,"FirstName","UserName='"+username+"'"));
-        lastUpdate.setText(model.selectQuery(tableName,"LastName","UserName='"+username+"'"));
+        passwordUpdate.setText(getPassword(username));
+        confirmUpdate.setText(getPassword(username));
+        firstUpdate.setText(getFirstName(username));
+        lastUpdate.setText(getLastName(username));
         birthUpdate.setValue(parseBirthday(username));
-        cityUpdate.setText(model.selectQuery(tableName,"City","UserName='"+username+"'"));
+        cityUpdate.setText(getCity(username));
     }
 
     private LocalDate parseBirthday(String username) {
-       String date=model.selectQuery(tableName,"Birthday","UserName='"+username+"'");
-       String[] details=date.split("/");
-       return LocalDate.of(Integer.parseInt(details[2]),Integer.parseInt(details[0]),Integer.parseInt(details[1]));
+        String[] details=getBirthday(username).split("/");
+        return LocalDate.of(Integer.parseInt(details[2]),Integer.parseInt(details[0]),Integer.parseInt(details[1]));
     }
 
 
     public void signOut(ActionEvent event){
-        tabSignOut();
+        if(confirm("Are you sure you want to sign-out?"))
+            tabSignOut();
         event.consume();
     }
 
     public void delete(ActionEvent event){
-
+        if(confirm("Are you sure you want to delete your account?")){
+            info("Your account was deleted successfully!");
+            model.UsersTable_deleteUserByUsername(username);
+            tabSignOut();
+        }
+        event.consume();
     }
 
     public void show(ActionEvent event){
-        if(model.existingUsername(tableName,usernameRead.getText())==true){
-            firstRead.setText(model.selectQuery(tableName,"FirstName","UserName='"+usernameRead.getText()+"'"));
-            lastRead.setText(model.selectQuery(tableName,"LastName","UserName='"+usernameRead.getText()+"'"));
-            birthRead.setText(model.selectQuery(tableName,"Birthday","UserName='"+usernameRead.getText()+"'"));
-            cityRead.setText(model.selectQuery(tableName,"City","UserName='"+usernameRead.getText()+"'"));
+        if(model.UsersTable_existingUsername(usernameRead.getText())==true){
+            firstRead.setText(getFirstName(username));
+            lastRead.setText(getLastName(username));
+            birthRead.setText(getBirthday(username));
+            cityRead.setText(getCity(username));
         }
         else {
-            confirm("Username is incorrect");
+            error("Username is incorrect");
             event.consume();
         }
     }
     public void update(ActionEvent event){
         if(updateEmpty()==true){
-            confirm("Please fill all the fields");
+            info("Please fill all the fields");
             event.consume();
         }
-        else if(model.existingUsername(tableName,usernameUpdate.getText())==true && usernameUpdate.getText().equals(this.username)==false){
-            confirm("Username already taken");
+        else if(model.UsersTable_existingUsername(usernameUpdate.getText())==true && usernameUpdate.getText().equals(this.username)==false){
+            error("Username already taken");
             event.consume();
         }
         else if(passwordUpdate.getText().equals(confirmUpdate.getText())==false){
-            confirm("Password must be match in both options");
+            error("Password must be match in both options");
             event.consume();
         }
-        model.updateUserInfo(username,usernameUpdate.getText(),passwordUpdate.getText(),DatePicker2Str(birthUpdate),firstUpdate.getText(),lastUpdate.getText(),cityUpdate.getText());
-        username=usernameUpdate.getText();
-        updateHome(username);
-        confirm("Update confirmed!");
+        else if(confirm("Are you sure you want to update the details?")){
+            model.UsersTable_updateUserInfoByUsername(username,usernameUpdate.getText(),passwordUpdate.getText(),DatePicker2Str(birthUpdate),firstUpdate.getText(),lastUpdate.getText(),cityUpdate.getText());
+            username=usernameUpdate.getText();
+            updateHome(username);
+            info("The update was made successfully!");
+        }
         event.consume();
     }
 
     private void updateHome(String username) {
         usernameHome.setText(username);
-        firstHome.setText(model.selectQuery(tableName,"FirstName","UserName='"+username+"'"));
-        lastHome.setText(model.selectQuery(tableName,"LastName","UserName='"+username+"'"));
-        birthHome.setText(model.selectQuery(tableName,"Birthday","UserName='"+username+"'"));
-        cityHome.setText(model.selectQuery(tableName,"City","UserName='"+username+"'"));
+        firstHome.setText(getFirstName(username));
+        lastHome.setText(getLastName(username));
+        birthHome.setText(getBirthday(username));
+        cityHome.setText(getCity(username));
     }
 
-    public boolean confirm(String str){
+    public boolean confirm(String massage){
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setContentText(str);
+        alert.setContentText(massage);
         Optional<ButtonType> result = alert.showAndWait();
         return result.get() == ButtonType.OK;
     }
+
+    public void error(String massage){
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setContentText(massage);
+        Optional<ButtonType> result = alert.showAndWait();
+    }
+
+    public void info(String massage){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setContentText(massage);
+        Optional<ButtonType> result = alert.showAndWait();
+    }
+
+    private String[] getDetails(String username){
+        return model.UsersTable_getUserByUsername(username);
+    }
+
+    private String getPassword(String username){
+        return model.UsersTable_getUserByUsername(username)[1];
+    }
+
+    private String getBirthday(String username){
+        return model.UsersTable_getUserByUsername(username)[2];
+    }
+
+    private String getFirstName(String username){
+        return model.UsersTable_getUserByUsername(username)[3];
+    }
+
+    private String getLastName(String username){
+        return model.UsersTable_getUserByUsername(username)[4];
+    }
+
+    private String getCity(String username){
+        return model.UsersTable_getUserByUsername(username)[5];
+    }
+
 
 //    public void submitValues(ActionEvent actionEvent) {
 //        //trim all fields from spaces ((not must))

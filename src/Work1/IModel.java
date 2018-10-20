@@ -1,4 +1,4 @@
-package sample;
+package Work1;
 
 
 public interface IModel {

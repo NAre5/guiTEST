@@ -1,9 +1,8 @@
-package sample;
+package Work1;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import sample.Model;
 
 import java.net.URL;
 import java.time.LocalDate;

@@ -3,10 +3,12 @@ package sample;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.util.StringConverter;
 import sample.Model;
 
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -66,9 +68,39 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         tabSignOut();
-        birthCreate.setPromptText("MONTH/DAY/YEAR");
-        birthUpdate.setPromptText("MONTH/DAY/YEAR");
+        String pattern = "dd-MM-yyyy";
+        changeDateFormat(birthCreate,pattern);
+        changeDateFormat(birthUpdate,pattern);
+
         username="";
+    }
+
+    private void changeDateFormat(DatePicker dp, String pattern)
+    {
+        dp.setPromptText(pattern.toLowerCase());
+
+        dp.setConverter(new StringConverter<LocalDate>() {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+
+            @Override
+            public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override
+            public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+        dp.setPromptText(pattern);
     }
 
     public void setModel(Model model){

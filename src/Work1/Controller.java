@@ -1,4 +1,4 @@
-package sample;
+package Work1;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;

@@ -235,7 +235,7 @@ public class Controller implements Initializable {
             error("Username is incorrect");
             event.consume();
         }
-        else if(model.UsersTable_checkPassword(username,passwordSign.getText())==false && model.UsersTable_checkPassword(username,passwordCreate.getText())==false){
+        else if(model.UsersTable_checkPassword(username,password)==false){
             error("Username or Password are incorrect");
             event.consume();
         }

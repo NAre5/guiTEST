@@ -305,7 +305,10 @@ public class Controller implements Initializable {
         }
         else if(confirm("Are you sure you want to update the details?")){
             model.UsersTable_updateUserInfoByUsername(username,usernameUpdate.getText(),passwordUpdate.getText(),DatePicker2Str(birthUpdate),firstUpdate.getText(),lastUpdate.getText(),cityUpdate.getText());
-            username=usernameUpdate.getText();
+            if(usernameUpdate.getText().equals(this.username)==false){
+                clearRead();
+                username=usernameUpdate.getText();
+            }
             updateHome(username);
             info("The update was made successfully!");
         }

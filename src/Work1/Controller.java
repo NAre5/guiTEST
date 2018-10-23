@@ -280,10 +280,10 @@ public class Controller implements Initializable {
 
     public void show(ActionEvent event){
         if(model.UsersTable_existingUsername(usernameRead.getText())==true){
-            firstRead.setText(getFirstName(username));
-            lastRead.setText(getLastName(username));
-            birthRead.setText(getBirthday(username));
-            cityRead.setText(getCity(username));
+            firstRead.setText(getFirstName(usernameRead.getText()));
+            lastRead.setText(getLastName(usernameRead.getText()));
+            birthRead.setText(getBirthday(usernameRead.getText()));
+            cityRead.setText(getCity(usernameRead.getText()));
         }
         else {
             error("Username is incorrect");

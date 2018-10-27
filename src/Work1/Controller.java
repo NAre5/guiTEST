@@ -14,23 +14,11 @@ public class Controller implements Initializable {
 
     //tabs
     public TabPane tabPane;
-    public Tab signTab;
-    public Tab homeTab;
     public Tab createTab;
     public Tab readTab;
     public Tab updateTab;
-    //Sign in tab
-    public TextField usernameSign;
-    public PasswordField passwordSign;
-    public Button submit;
-    //Home tab
-    public Label usernameHome;
-    public Label firstHome;
-    public Label lastHome;
-    public Label birthHome;
-    public Label cityHome;
-    public Button delete;
-    public Button signOut;
+    public Tab deleteTab;
+
     //Create tab
     public TextField usernameCreate;
     public TextField passwordCreate;
@@ -48,29 +36,31 @@ public class Controller implements Initializable {
     public Label birthRead;
     public Label cityRead;
     //update tab
+    public TextField usernameInputUpdate;
     public TextField usernameUpdate;
     public TextField passwordUpdate;
-    public TextField confirmUpdate;
     public TextField firstUpdate;
     public TextField lastUpdate;
     public DatePicker birthUpdate;
     public TextField cityUpdate;
     public Button update;
+    //delete tab
+    public TextField usernameDelete;
 
     final String directoryPath = "C:/DATABASE/";//////
     final String databaseName = "database.db";
     final String tableName = "Users_Table";
     Model model;
-    String username="";
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        tabSignOut();
         String pattern = "dd-MM-yyyy";
         changeDateFormat(birthCreate,pattern);
         changeDateFormat(birthUpdate,pattern);
-
-        username="";
+        createTab.setClosable(false);
+        readTab.setClosable(false);
+        updateTab.setClosable(false);
+        deleteTab.setClosable(false);
     }
 
     private void changeDateFormat(DatePicker dp, String pattern)
@@ -106,60 +96,15 @@ public class Controller implements Initializable {
         model.createNewUsersTable();
     }
 
-    public void tabSignOut(){
-        clearAll();
-        username="";
-        tabPane.getTabs().remove(0,tabPane.getTabs().size());
-        tabPane.getTabs().add(signTab);
-        tabPane.getTabs().add(createTab);
-        createTab.setText("Sign up");
-        create.setText("Sign up!");
-        create.setOnAction(this::signUp);
-        homeTab.setClosable(false);
-        createTab.setClosable(false);
-        signTab.setClosable(false);
-        readTab.setClosable(false);
-        updateTab.setClosable(false);
-    }
-
-    public void tabSignIn(){
-        clearAll();
-        tabPane.getTabs().remove(0,2);
-        tabPane.getTabs().add(homeTab);
-//        tabPane.getTabs().add(createTab);
-        tabPane.getTabs().add(readTab);
-        tabPane.getTabs().add(updateTab);
-//        createTab.setText("Create");
-//        create.setText("Create!");
-//        create.setOnAction(this::create);
-    }
-
-    public void signUp(ActionEvent event){
-        if(create(event)){
-            signIn(event,usernameCreate.getText(),passwordCreate.getText());
-            event.consume();
-        }
-    }
-
     private void clearAll() {
-        clearSignIn();
-        clearHome();
         clearCreate();
         clearRead();
         clearUpdate();
+        clearDelete();
     }
 
-    private void clearSignIn() {
-        usernameSign.clear();
-        passwordSign.clear();
-    }
-
-    private void clearHome() {
-        usernameHome.setText("");
-        firstHome.setText("");
-        lastHome.setText("");
-        birthHome.setText("");
-        cityHome.setText("");
+    private void clearDelete() {
+        usernameDelete.clear();
     }
 
     private void clearCreate() {
@@ -192,25 +137,29 @@ public class Controller implements Initializable {
     public boolean create(ActionEvent event) {
         if(createEmpty()==true){
             error("Please fill all the fields");
-            event.consume();
         }
         else if(passwordCreate.getText().equals(confirmCreate.getText())==false){
             error("Password must be match in both options");
-            event.consume();
         }
         else if(model.UsersTable_existingUsername(usernameCreate.getText())==true){
             error("Username already taken");
-            event.consume();
         }
-        else if(confirm("Are you sure you want to Sign up with those details?")){
+        else if(dateCheck(birthCreate.getValue())==false){
+            error("Age must be at least 18");
+        }
+        else if(confirm("Are you sure you want to Create an account with these details?")){
             model.UsersTable_createUser(usernameCreate.getText(),passwordCreate.getText(),DatePicker2Str(birthCreate),firstCreate.getText(),lastCreate.getText(),cityCreate.getText());
+            info("User creation was made successfully!");
+            clearCreate();
+            event.consume();
             return true;
         }
+        event.consume();
         return false;
     }
 
     private String DatePicker2Str(DatePicker value) {
-        return (value.getValue().getMonthValue()+"/"+value.getValue().getDayOfMonth()+"/"+value.getValue().getYear());
+        return (""+value.getValue().getDayOfMonth()+"-"+value.getValue().getMonthValue()+"-"+value.getValue().getYear()+"");
     }
 
     private boolean createEmpty() {
@@ -226,54 +175,41 @@ public class Controller implements Initializable {
             return false;
     }
 
-    public void submit(ActionEvent event){
-        signIn(event,usernameSign.getText(),passwordSign.getText());
-    }
 
-    private void signIn(ActionEvent event, String username, String password) {
-        if(model.UsersTable_existingUsername(username)==false){
-            error("Username is incorrect");
-            event.consume();
-        }
-        else if(model.UsersTable_checkPassword(username,password)==false){
-            error("Username or Password are incorrect");
-            event.consume();
-        }
+    public void fillUpdate(ActionEvent event) {
+        if(model.UsersTable_existingUsername(usernameInputUpdate.getText())==false)
+            error("Wrong username");
         else{
-            this.username=username;
-            tabSignIn();
-            updateHome(username);
-            fillUpdate(username);
+            usernameUpdate.setText(usernameInputUpdate.getText());
+            passwordUpdate.setText(getPassword(usernameInputUpdate.getText()));
+            firstUpdate.setText(getFirstName(usernameInputUpdate.getText()));
+            lastUpdate.setText(getLastName(usernameInputUpdate.getText()));
+            birthUpdate.setValue(parseBirthday(usernameInputUpdate.getText()));
+            cityUpdate.setText(getCity(usernameInputUpdate.getText()));
         }
-    }
-
-    private void fillUpdate(String username) {
-        usernameUpdate.setText(username);
-        passwordUpdate.setText(getPassword(username));
-        confirmUpdate.setText(getPassword(username));
-        firstUpdate.setText(getFirstName(username));
-        lastUpdate.setText(getLastName(username));
-        birthUpdate.setValue(parseBirthday(username));
-        cityUpdate.setText(getCity(username));
+        event.consume();
     }
 
     private LocalDate parseBirthday(String username) {
-        String[] details=getBirthday(username).split("/");
-        return LocalDate.of(Integer.parseInt(details[2]),Integer.parseInt(details[0]),Integer.parseInt(details[1]));
-    }
-
-
-    public void signOut(ActionEvent event){
-        if(confirm("Are you sure you want to sign-out?"))
-            tabSignOut();
-        event.consume();
+        String[] details=getBirthday(username).split("-");
+        return LocalDate.of(Integer.parseInt(details[2]),Integer.parseInt(details[1]),Integer.parseInt(details[0]));
     }
 
     public void delete(ActionEvent event){
         if(confirm("Are you sure you want to delete your account?")){
-            info("Your account was deleted successfully!");
-            model.UsersTable_deleteUserByUsername(username);
-            tabSignOut();
+            if(model.UsersTable_existingUsername(usernameDelete.getText())==false)
+                error("Wrong username");
+            else{
+                model.UsersTable_deleteUserByUsername(usernameDelete.getText());
+                if(usernameRead.getText().equals(usernameDelete.getText()))
+                    clearRead();
+                if(usernameInputUpdate.getText().equals(usernameDelete.getText())){
+                    clearUpdate();
+                    usernameInputUpdate.setText("");
+                }
+                info(usernameDelete.getText()+"'s account was deleted successfully!");
+                usernameDelete.clear();
+            }
         }
         event.consume();
     }
@@ -295,32 +231,27 @@ public class Controller implements Initializable {
             info("Please fill all the fields");
             event.consume();
         }
-        else if(model.UsersTable_existingUsername(usernameUpdate.getText())==true && usernameUpdate.getText().equals(this.username)==false){
+        if(model.UsersTable_existingUsername(usernameInputUpdate.getText())==false){
+            error("Wrong input username");
+            event.consume();
+        }
+        else if(model.UsersTable_existingUsername(usernameUpdate.getText())==true && usernameUpdate.getText().equals(usernameInputUpdate.getText())==false){
             error("Username already taken");
             event.consume();
         }
-        else if(passwordUpdate.getText().equals(confirmUpdate.getText())==false){
-            error("Password must be match in both options");
+        else if(dateCheck(birthUpdate.getValue())==false){
+            error("Age must be at least 18");
             event.consume();
         }
         else if(confirm("Are you sure you want to update the details?")){
-            model.UsersTable_updateUserInfoByUsername(username,usernameUpdate.getText(),passwordUpdate.getText(),DatePicker2Str(birthUpdate),firstUpdate.getText(),lastUpdate.getText(),cityUpdate.getText());
-            if(usernameUpdate.getText().equals(this.username)==false){
+            if(usernameInputUpdate.getText().equals(usernameRead.getText()))
                 clearRead();
-                username=usernameUpdate.getText();
-            }
-            updateHome(username);
+            model.UsersTable_updateUserInfoByUsername(usernameInputUpdate.getText(),usernameUpdate.getText(),passwordUpdate.getText(),DatePicker2Str(birthUpdate),firstUpdate.getText(),lastUpdate.getText(),cityUpdate.getText());
+            usernameInputUpdate.setText(usernameUpdate.getText());
+            clearUpdate();
             info("The update was made successfully!");
         }
         event.consume();
-    }
-
-    private void updateHome(String username) {
-        usernameHome.setText(username);
-        firstHome.setText(getFirstName(username));
-        lastHome.setText(getLastName(username));
-        birthHome.setText(getBirthday(username));
-        cityHome.setText(getCity(username));
     }
 
     public boolean confirm(String massage){
@@ -364,6 +295,13 @@ public class Controller implements Initializable {
 
     private String getCity(String username){
         return model.UsersTable_getUserByUsername(username)[Model.UsersfieldNameEnum.City.ordinal()];
+    }
+
+    private boolean dateCheck(LocalDate date){
+        LocalDate today=LocalDate.now();
+        if((today.getYear()-date.getYear()>=18) || (today.getYear()-date.getYear()==17 && today.getMonthValue()>=date.getMonthValue()))
+            return true;
+        return false;
     }
 
 }

@@ -231,7 +231,7 @@ public class Controller implements Initializable {
             info("Please fill all the fields");
             event.consume();
         }
-        if(model.UsersTable_existingUsername(usernameInputUpdate.getText())==false){
+        else if(model.UsersTable_existingUsername(usernameInputUpdate.getText())==false){
             error("Wrong input username");
             event.consume();
         }

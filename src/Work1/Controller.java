@@ -298,10 +298,9 @@ public class Controller implements Initializable {
     }
 
     private boolean dateCheck(LocalDate date){
-        LocalDate today=LocalDate.now();
-        if((today.getYear()-date.getYear()>=18) || (today.getYear()-date.getYear()==17 && today.getMonthValue()>=date.getMonthValue()))
-            return true;
-        return false;
+        LocalDate today=LocalDate.now().plusDays(1);
+        LocalDate before18=today.minusYears(18);
+        return (date.isBefore(before18));
     }
 
 }
